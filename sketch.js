@@ -10,7 +10,7 @@ function setup() {
   // 16 * 16 and 40 mines is approximatley an intermediate difficulty
   boardWidth = 15;
   boardHeight = 15;
-  numMines = 140;
+  numMines = 40;
   squareSize = Math.floor(Math.min(width, height) / Math.max(boardWidth, boardHeight));
   playing = true;
 
@@ -44,7 +44,6 @@ function init(board) {
     const j = Math.round(random(0, boardHeight-1));
     if (!board[i][j].hasMine) {
       minesLeft = minesLeft - 1;
-      console.log(minesLeft);
 
       // Add mines to square, and increment neighbors mine counters;
       board[i][j].addMine(board);
@@ -53,10 +52,11 @@ function init(board) {
 }
 
 function mouseClicked() {
+  // if (!playing) return;
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].length; j++) {
       // If we clicked an unclicked square
-      if (board[i][j].clicked(mouseX, mouseY)) {
+      if (board[i][j].clicked(board, mouseX, mouseY)) {
         // Check if it's a mine.
         if (board[i][j].hasMine) {
           playing = false; // TODO add game over

@@ -5,10 +5,11 @@ class square {
 		this.squareSize = squareSize;
 		this.hasMine = false;
 		this.isClicked = false;
+		this.isHidden = true;
 		this.borderMines = 0;
 	}
 
-	clicked(px, py) {
+	clicked(board, px, py) {
 		// check if the mouse click was inside the square
 		const bx = this.i * this.squareSize;
 		const by = this.j * this.squareSize;
@@ -19,7 +20,8 @@ class square {
 			py < by + this.squareSize
 		) {
 			this.isClicked = true;
-			updateBorderingSquares();
+			this.isHidden = false;
+			if (!this.hasMine) this.updateBorderingSquares(board, this.i, this.j);
 			return true;
 		}
 		return false;
@@ -27,37 +29,52 @@ class square {
 
 	show() {
 		stroke(100);
+		let x = this.i * this.squareSize;
+		let y = this.j * this.squareSize;
+		if (this.isHidden) {
+			fill('white');
+			rect(x, y, this.squareSize - 1, this.squareSize - 1);
+			return;
+		}
+
 		if (this.isClicked) {
-			fill('black');
-			rect(this.i * squareSize, this.j * squareSize, squareSize - 1, squareSize - 1);
+		fill('black');
+		rect(x, y, squareSize - 1, squareSize - 1);
 			if (this.hasMine) {
 				fill('red')
 				noStroke();
-				let x = this.i * this.squareSize;
-				let y = this.j * this.squareSize;
 				triangle(x, y + this.squareSize / 2, x + this.squareSize, y + this.squareSize / 2, x + this.squareSize / 2, y + this.squareSize);
 				triangle(x, y + this.squareSize / 2, x + this.squareSize / 2, y, x + this.squareSize, y + this.squareSize / 2);
 			}
-		} else {
-			fill('white');
-			rect(this.i * squareSize, this.j * squareSize, squareSize - 1, squareSize - 1);
+		} else if (!this.isHidden) {
+			fill('grey');
+			rect(x, y, this.squareSize - 1, this.squareSize - 1);
+			textAlign(CENTER);
+			fill('red');
+			text(this.borderMines, x + this.squareSize / 2, y + this.squareSize / 2);
+		}
+}
+
+	updateBorderingSquares(board, i, j) {
+		let rowLimit = board.length - 1;
+		let columnLimit = board[0].length - 1;
+
+		for (let l = max(0, this.i - 1); l <= min(this.i + 1, rowLimit); l++) {
+			for (let m = max(0, this.j - 1); m <= min(this.j + 1, columnLimit); m++) {
+				if (l !== this.i || m !== this.j) {
+					if (board[l][m].hasMine == false && board[l][m].isHidden == true) {
+						board[l][m].isHidden = false;
+
+						if (board[l][m].borderMines == 0) {
+							board[l][m].isClicked = true; // Simulate a click, and update bordering squares
+							board[l][m].updateBorderingSquares(board, i, j);
+							console.log(l, m);
+						}
+					}
+				}
+			}
 		}
 	}
-
-
-
-
-
-	//updateBorderingSquares(i, j) {
-	//	// TODO, if we have a mine, "click" all squares
-	//	for (let l = max(0, i - 1); l <= min(i + 1, squareSize); l++){
-	//		for (let m = max(0, j - 1); j <= min(j + 1, squareSize); j++) {
-	//			if (l !== i || m !== j) {
-	//				console.log(board[i][j].hasMine, i, j);
-	//			}
-	//		}
-	//	}
-	//}
 
 	addMine(board){
 		this.hasMine = true;
@@ -74,6 +91,5 @@ class square {
 			}
 		}
 	}
-
 }
 
