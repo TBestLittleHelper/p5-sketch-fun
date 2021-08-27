@@ -3,14 +3,16 @@ let boardHeight;
 let boardWidth;
 let board;
 let squareSize;
+let playing;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   // 16 * 16 and 40 mines is approximatley an intermediate difficulty
   boardWidth = 15;
   boardHeight = 15;
-  numMines = 40;
-  squareSize = Math.floor(Math.min(width,height) / Math.max(boardWidth,boardHeight));
+  numMines = 140;
+  squareSize = Math.floor(Math.min(width, height) / Math.max(boardWidth, boardHeight));
+  playing = true;
 
 
   board = new Array(boardWidth);
@@ -21,7 +23,7 @@ function setup() {
       board[i][j] = s;
     }
   }
-  init();
+  init(board);
 }
 
 function draw() {
@@ -34,15 +36,18 @@ function draw() {
   }
 }
 
-
-function init() {
+function init(board) {
+  // Place mines randomly, by using a random i and j
   let minesLeft = numMines;
-  for (let i = 0; i < 14; i++) {
-    for (let j = 0; j < 14; j++) {
-      if (minesLeft > 0) {
-        minesLeft = minesLeft - 1;
-        board[i][j].hasMine = true;
-      }
+  while (minesLeft > 0) {
+    const i = Math.round(random(0,boardWidth-1));
+    const j = Math.round(random(0, boardHeight-1));
+    if (!board[i][j].hasMine) {
+      minesLeft = minesLeft - 1;
+      console.log(minesLeft);
+
+      // Add mines to square, and increment neighbors mine counters;
+      board[i][j].addMine(board);
     }
   }
 }
@@ -50,7 +55,19 @@ function init() {
 function mouseClicked() {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].length; j++) {
-      if (board[i][j].clicked(mouseX, mouseY)) return;
+      // If we clicked an unclicked square
+      if (board[i][j].clicked(mouseX, mouseY)) {
+        // Check if it's a mine.
+        if (board[i][j].hasMine) {
+          playing = false; // TODO add game over
+        }
+        return;
+      };
     }
   }
+}
+
+// TODO
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
