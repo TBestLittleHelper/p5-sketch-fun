@@ -19,6 +19,8 @@ class square {
 			py > by - this.squareSize &&
 			py < by + this.squareSize
 		) {
+			if (!this.isHidden || this.isClicked) return true; //return if Square is already reveled
+
 			this.isClicked = true;
 			this.isHidden = false;
 			if (!this.hasMine) this.updateBorderingSquares(board, this.i, this.j);
@@ -32,14 +34,14 @@ class square {
 		let x = this.i * this.squareSize;
 		let y = this.j * this.squareSize;
 		if (this.isHidden) {
-			fill('white');
+			fill('black');
 			rect(x, y, this.squareSize - 1, this.squareSize - 1);
 			return;
 		}
 
 		if (this.isClicked) {
-		fill('black');
-		rect(x, y, squareSize - 1, squareSize - 1);
+			fill('white');
+			rect(x, y, squareSize - 1, squareSize - 1);
 			if (this.hasMine) {
 				fill('red')
 				noStroke();
@@ -53,8 +55,7 @@ class square {
 			fill('red');
 			text(this.borderMines, x + this.squareSize / 2, y + this.squareSize / 2);
 		}
-}
-
+	}
 	updateBorderingSquares(board, i, j) {
 		let rowLimit = board.length - 1;
 		let columnLimit = board[0].length - 1;
@@ -62,7 +63,7 @@ class square {
 		for (let l = max(0, this.i - 1); l <= min(this.i + 1, rowLimit); l++) {
 			for (let m = max(0, this.j - 1); m <= min(this.j + 1, columnLimit); m++) {
 				if (l !== this.i || m !== this.j) {
-					if (board[l][m].hasMine == false && board[l][m].isHidden == true) {
+					if (board[l][m].isHidden == true && board[l][m].hasMine == false) {
 						board[l][m].isHidden = false;
 
 						if (board[l][m].borderMines == 0) {
@@ -76,13 +77,13 @@ class square {
 		}
 	}
 
-	addMine(board){
+	addMine(board) {
 		this.hasMine = true;
 
 		let rowLimit = board.length - 1;
 		let columnLimit = board[0].length - 1;
 
-		for (let l = max(0, this.i - 1); l <= min(this.i + 1, rowLimit); l++){
+		for (let l = max(0, this.i - 1); l <= min(this.i + 1, rowLimit); l++) {
 			for (let m = max(0, this.j - 1); m <= min(this.j + 1, columnLimit); m++) {
 				if (l !== this.i || m !== this.j) {
 					board[l][m].borderMines = board[l][m].borderMines + 1;
